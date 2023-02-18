@@ -1,26 +1,22 @@
-from django.shortcuts import render, get_object_or_404
-from .models import Post, Group
+from django.conf import settings
+from django.shortcuts import get_object_or_404, render
+
+from .models import Group, Post
 
 
 def index(request):
-    template = 'posts/index.html'
-    title = 'Последние объявления на сайте'
-    posts = Post.objects.order_by('-pub_date')[:10]
+    posts = Post.objects.order_by('-pub_date')[:settings.POSTS_NUM]
     context = {
-        'title': title,
         'posts': posts,
     }
-    return render(request, template, context)
+    return render(request, 'posts/index.html', context)
 
 
 def group_posts(request, slug):
-    template = 'posts/group_list.html'
-    title = f'Записи сообщества {slug}'
     group = get_object_or_404(Group, slug=slug)
-    posts = Post.objects.filter(group=group).order_by('-pub_date')[:10]
+    posts = group.posts.all()[:settings.POSTS_NUM]
     context = {
-        'title': title,
         'group': group,
         'posts': posts,
     }
-    return render(request, template, context)
+    return render(request, 'posts/group_list.html', context)
